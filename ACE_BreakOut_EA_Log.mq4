@@ -57,8 +57,14 @@ bool getIndicatorValues() {
   else {
     signal = -1;
   }
+  
+  double bs = iCustom(NULL, 0, indName, 0, 1);
+  double ss = iCustom(NULL, 0, indName, 1, 1);
+  double sl1 = iCustom(NULL, 0, indName, 2, 1);
+  double sl2 = iCustom(NULL, 0, indName, 3, 1);
+  double sl = ObjectGetDouble(0, "StopLoss", OBJPROP_PRICE);
 
-  FileWrite(handle, TimeToStr(Time[0]), Ask, Bid, positionCount, signal, stopLoss, entryPrice, quickProfit, firstTarget, finalTarget);    
+  FileWrite(handle, TimeToStr(Time[0]), Ask, Bid, positionCount, bs, ss, sl1, sl2, sl, entryPrice, quickProfit, firstTarget, finalTarget);
 
   return (signal != -1);
 }
@@ -125,8 +131,9 @@ int OnInit()
     return -1;
   }
   else {
-    FileWrite(handle, "Time", "Ask", "Bid", "Pos Count", "Signal", "Signal", "StopLoss", "Quick Profit", "First Profit", "Final Profit");    
+    FileWrite(handle, "Time", "Ask", "Bid", "Pos Count", "Buy Signal", "Sell Signal", "Buy SL", "Sell SL", "Obj SL", "Entry Price", "Quick Profit", "First Profit", "Final Profit");    
   }
+
 //---
    return(INIT_SUCCEEDED);
   }
