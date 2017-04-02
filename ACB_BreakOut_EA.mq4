@@ -164,15 +164,19 @@ void scanPositions() {
         if(direction == OP_BUY) {
           positionCount ++;
           if(signal == OP_SELL || isFridayNight()) {
-            if(OrderClose(OrderTicket(), OrderLots(), NormalizeDouble(Bid, Digits), 3))
+            if(OrderClose(OrderTicket(), OrderLots(), NormalizeDouble(Bid, Digits), 3)) {
               positionCount --;
+              i = -1;
+            }
           }
         }
         else if(direction == OP_SELL) {
           positionCount --;
           if(signal == OP_BUY || isFridayNight()) {
-            if(OrderClose(OrderTicket(), OrderLots(), NormalizeDouble(Ask, Digits), 3))
+            if(OrderClose(OrderTicket(), OrderLots(), NormalizeDouble(Ask, Digits), 3)) {
               positionCount ++;
+              i = -1;
+            }
           }
         }
 
