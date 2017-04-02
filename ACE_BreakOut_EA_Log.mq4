@@ -64,7 +64,7 @@ bool getIndicatorValues() {
   double sl2 = iCustom(NULL, 0, indName, 3, 1);
   double sl = ObjectGetDouble(0, "StopLoss", OBJPROP_PRICE);
 
-  FileWrite(handle, TimeToStr(Time[0]), Ask, Bid, positionCount, bs, ss, sl1, sl2, sl, entryPrice, quickProfit, firstTarget, finalTarget);
+  FileWrite(handle, TimeToStr(Time[0]), Ask, Bid, positionCount, bs, ss, sl1, sl2, sl, entryPrice, quickProfit, firstTarget, finalTarget, OrdersTotal());
 
   return (signal != -1);
 }
@@ -131,7 +131,9 @@ int OnInit()
     return -1;
   }
   else {
-    FileWrite(handle, "Time", "Ask", "Bid", "Pos Count", "Buy Signal", "Sell Signal", "Buy SL", "Sell SL", "Obj SL", "Entry Price", "Quick Profit", "First Profit", "Final Profit");    
+    FileWrite(handle, minSL, minLot, maxLot, lotStep, lotSize, thisSymbol, AccountEquity(), OrdersTotal());
+    FileWrite(handle, Stop_Loss_Percentage, Open_Time, Close_Time, EMA_Filter, EMA_Period, Friday_Close_Time);
+    FileWrite(handle, "Time", "Ask", "Bid", "Pos Count", "Buy Signal", "Sell Signal", "Buy SL", "Sell SL", "Obj SL", "Entry Price", "Quick Profit", "First Profit", "Final Profit", "OrdersTotal");    
   }
 
 //---
