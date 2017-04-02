@@ -27,6 +27,8 @@ string thisSymbol;
 double minSL;
 double minLot;
 double maxLot;
+double lotStep;
+double lotSize;
 
 int positionCount;
 
@@ -78,10 +80,10 @@ bool determineFilter() {
 
 void calcLot(double priceDiff, double& quickLot, double& targetLot) {
 
-  double totalLot = 0.01 * Point * (AccountEquity() * Stop_Loss_Percentage / 100.0) / priceDiff;
+  double totalLot = (AccountEquity() * Stop_Loss_Percentage / 100.0) / (priceDiff * lotSize);
 
-  targetLot = MathFloor(totalLot / 3.0 * 100.0) / 100.0;
-  quickLot = MathFloor((totalLot - (targetLot * 2.0)) * 100.0) / 100.0;
+  targetLot = MathFloor(totalLot / (3.0 * lotStep)) * lotStep;
+  quickLot = MathFloor((totalLot - (targetLot * 2.0)) / lotStep) * lotStep;
   
   if(maxLot < targetLot) {
     targetLot = maxLot;
@@ -111,7 +113,9 @@ int OnInit()
   minSL = MarketInfo(Symbol(), MODE_STOPLEVEL) * Point;
   minLot = MarketInfo(Symbol(), MODE_MINLOT);
   maxLot = MarketInfo(Symbol(), MODE_MAXLOT);
-
+  lotStep = MarketInfo(Symbol(), MODE_LOTSTEP);
+  lotSize = MarketInfo(Symbol(), MODE_LOTSIZE);
+  
 //---
    return(INIT_SUCCEEDED);
   }
