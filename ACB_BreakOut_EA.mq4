@@ -82,6 +82,11 @@ void calcLot(double priceDiff, double& quickLot, double& targetLot) {
 
   double totalLot = (AccountEquity() * Stop_Loss_Percentage / 100.0) / (priceDiff * lotSize);
 
+  if(!StringCompare(StringSubstr(thisSymbol, 3, 3), "USD")) {
+    double usdjpy = (MarketInfo("USDJPY", MODE_ASK) + MarketInfo(USDJPY, MODE_BID)) / 2.0;
+    totalLot /= usdjpy;
+  }
+
   targetLot = MathFloor(totalLot / (3.0 * lotStep)) * lotStep;
   quickLot = MathFloor((totalLot - (targetLot * 2.0)) / lotStep) * lotStep;
   
