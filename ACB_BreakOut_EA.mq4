@@ -9,12 +9,21 @@
 #property version   "1.00"
 #property strict
 
+enum exitMethod {
+   SPLIT = 0,
+   QUICK = 1,
+   FIRST = 2,
+   FINAL = 3
+};
+
+input exitMethod Exit_Method = SPLIT;
 input double Stop_Loss_Percentage = 1.0;
 input int Open_Time = 0;
 input int Close_Time = 24;
 input bool EMA_Filter = False;
 input int EMA_Period = 200;
 input int Friday_Close_Time = 23;
+input int Magic_Number = 1;
 
 double stopLoss;
 double entryPrice;
@@ -41,6 +50,21 @@ bool getIndicatorValues() {
   quickProfit = ObjectGetDouble(0, "FirstTarget", OBJPROP_PRICE);
   firstTarget = ObjectGetDouble(0, "Target1", OBJPROP_PRICE);
   finalTarget = ObjectGetDouble(0, "Target2", OBJPROP_PRICE);
+  
+  switch(Exit_Method) {
+    case QUICK:
+      firstTarget = quickProfit;
+      finalTarget = quickProfit;
+      break;
+    case FIRST:
+      quickProfit = firstTarget;
+      finalTarget = firstTarget;
+      break;
+    case FINAL:
+      quickProfit = finalTarget;
+      firstTarget = finalTarget;
+      break;
+  } 
 
   if(iCustom(NULL, 0, indName, 0, 1)) {
     signal = OP_BUY;
@@ -83,7 +107,7 @@ void calcLot(double priceDiff, double& quickLot, double& targetLot) {
   double totalLot = (AccountEquity() * Stop_Loss_Percentage / 100.0) / (priceDiff * lotSize);
 
   if(!StringCompare(StringSubstr(thisSymbol, 3, 3), "USD")) {
-    double usdjpy = (MarketInfo("USDJPY", MODE_ASK) + MarketInfo(USDJPY, MODE_BID)) / 2.0;
+    double usdjpy = (MarketInfo("USDJPY", MODE_ASK) + MarketInfo("USDJPY", MODE_BID)) / 2.0;
     totalLot /= usdjpy;
   }
 
@@ -163,7 +187,7 @@ void scanPositions() {
 
   for(int i = 0; i < OrdersTotal(); i++) {
     if(OrderSelect(i, SELECT_BY_POS)) {
-      if(!StringCompare(OrderSymbol(), thisSymbol)) {
+      if(!StringCompare(OrderSymbol(), thisSymbol) && OrderMagicNumber() == Magic_Number) {
         int direction = OrderType();
 
         if(direction == OP_BUY) {
@@ -219,7 +243,7 @@ bool openPositions() {
     }
 
     if((minLot <= quickLot && quickLot <= maxLot) && positionCount == 0) {
-      int quick = OrderSend(thisSymbol, OP_BUY, quickLot, NormalizeDouble(Ask, Digits), 3, NormalizeDouble(stopLoss, Digits), NormalizeDouble(quickProfit, Digits));
+      int quick = OrderSend(thisSymbol, OP_BUY, quickLot, NormalizeDouble(Ask, Digits), 3, NormalizeDouble(stopLoss, Digits), NormalizeDouble(quickProfit, Digits), NULL, Magic_Number);
       if(quick == -1) {
         return False;
       }
@@ -228,7 +252,7 @@ bool openPositions() {
       }
     }
     if((minLot <= targetLot && targetLot <= maxLot) && positionCount == 1) {
-      int target = OrderSend(thisSymbol, OP_BUY, targetLot, NormalizeDouble(Ask, Digits), 3, NormalizeDouble(stopLoss, Digits), NormalizeDouble(firstTarget, Digits));
+      int target = OrderSend(thisSymbol, OP_BUY, targetLot, NormalizeDouble(Ask, Digits), 3, NormalizeDouble(stopLoss, Digits), NormalizeDouble(firstTarget, Digits), NULL, Magic_Number);
       if(target == -1) {
         return False;
       }
@@ -237,7 +261,7 @@ bool openPositions() {
       }
     }      
     if((minLot <= targetLot && targetLot <= maxLot) && positionCount == 2) {
-      int target = OrderSend(thisSymbol, OP_BUY, targetLot, NormalizeDouble(Ask, Digits), 3, NormalizeDouble(stopLoss, Digits), NormalizeDouble(finalTarget, Digits));
+      int target = OrderSend(thisSymbol, OP_BUY, targetLot, NormalizeDouble(Ask, Digits), 3, NormalizeDouble(stopLoss, Digits), NormalizeDouble(finalTarget, Digits), NULL, Magic_Number);
       if(target == -1) {
         return False;
       }
@@ -260,7 +284,7 @@ bool openPositions() {
     }
 
     if((minLot <= quickLot && quickLot <= maxLot) && positionCount == 0) {
-      int quick = OrderSend(thisSymbol, OP_SELL, quickLot, NormalizeDouble(Bid, Digits), 3, NormalizeDouble(stopLoss, Digits), NormalizeDouble(quickProfit, Digits));
+      int quick = OrderSend(thisSymbol, OP_SELL, quickLot, NormalizeDouble(Bid, Digits), 3, NormalizeDouble(stopLoss, Digits), NormalizeDouble(quickProfit, Digits), NULL, Magic_Number);
       if(quick == -1) {
         return False;
       }
@@ -269,7 +293,7 @@ bool openPositions() {
       }
     }
     if((minLot <= targetLot && targetLot <= maxLot) && positionCount == -1) {
-      int target = OrderSend(thisSymbol, OP_SELL, targetLot, NormalizeDouble(Bid, Digits), 3, NormalizeDouble(stopLoss, Digits), NormalizeDouble(firstTarget, Digits));
+      int target = OrderSend(thisSymbol, OP_SELL, targetLot, NormalizeDouble(Bid, Digits), 3, NormalizeDouble(stopLoss, Digits), NormalizeDouble(firstTarget, Digits), NULL, Magic_Number);
       if(target == -1) {
         return False;
       }
@@ -278,7 +302,7 @@ bool openPositions() {
       }
     }      
     if((minLot <= targetLot && targetLot <= maxLot) && positionCount == -2) {
-      int target = OrderSend(thisSymbol, OP_SELL, targetLot, NormalizeDouble(Bid, Digits), 3, NormalizeDouble(stopLoss, Digits), NormalizeDouble(finalTarget, Digits));
+      int target = OrderSend(thisSymbol, OP_SELL, targetLot, NormalizeDouble(Bid, Digits), 3, NormalizeDouble(stopLoss, Digits), NormalizeDouble(finalTarget, Digits), NULL, Magic_Number);
       if(target == -1) {
         return False;
       }
