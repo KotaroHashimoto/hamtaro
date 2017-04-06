@@ -25,7 +25,7 @@ input int EMA_Period = 200;
 input int Friday_Close_Time = 23;
 input int Magic_Number = 1;
 
-const string sUSDJPY = "USDJPY";
+const string symbolSuffix = "-cd";
 
 double stopLoss;
 double entryPrice;
@@ -115,7 +115,7 @@ void calcLot(double priceDiff, double& quickLot, double& targetLot) {
 
   string base = StringSubstr(thisSymbol, 3, 3);
   if(StringCompare(base, "JPY") != 0) {
-    double basejpy = (MarketInfo(base + "JPY", MODE_ASK) + MarketInfo(base + "JPY", MODE_BID)) / 2.0;
+    double basejpy = (MarketInfo(base + "JPY" + symbolSuffix, MODE_ASK) + MarketInfo(base + "JPY" + symbolSuffix, MODE_BID)) / 2.0;
     totalLot /= basejpy;
   }
 
