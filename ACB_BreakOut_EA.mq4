@@ -25,10 +25,14 @@ input int EMA_Period = 200;
 input int Friday_Close_Time = 23;
 input int Magic_Number = 1;
 
+const string sUSDJPY = "USDJPY";
+
 double stopLoss;
 double entryPrice;
 double quickProfit;
 double firstTarget;
+double trailQuick;
+double trailFirst;
 double finalTarget;
 int signal;
 
@@ -50,6 +54,9 @@ bool getIndicatorValues() {
   quickProfit = ObjectGetDouble(0, "FirstTarget", OBJPROP_PRICE);
   firstTarget = ObjectGetDouble(0, "Target1", OBJPROP_PRICE);
   finalTarget = ObjectGetDouble(0, "Target2", OBJPROP_PRICE);
+  
+  trailQuick = quickProfit;
+  trailFirst = firstTarget;
   
   switch(Exit_Method) {
     case QUICK:
@@ -107,7 +114,7 @@ void calcLot(double priceDiff, double& quickLot, double& targetLot) {
   double totalLot = (AccountEquity() * Stop_Loss_Percentage / 100.0) / (priceDiff * lotSize);
 
   if(!StringCompare(StringSubstr(thisSymbol, 3, 3), "USD")) {
-    double usdjpy = (MarketInfo("USDJPY", MODE_ASK) + MarketInfo("USDJPY", MODE_BID)) / 2.0;
+    double usdjpy = (MarketInfo(sUSDJPY, MODE_ASK) + MarketInfo(sUSDJPY, MODE_BID)) / 2.0;
     totalLot /= usdjpy;
   }
 
@@ -160,18 +167,18 @@ void OnDeinit(const int reason)
 void trailPosition(int direction) {
 
   if(direction == OP_BUY) {
-    if(firstTarget < Bid && minSL < (Bid - quickProfit) && OrderStopLoss() < quickProfit) {
-      bool modified = OrderModify(OrderTicket(), OrderOpenPrice(), NormalizeDouble(quickProfit, Digits), OrderTakeProfit(), 0);
+    if(trailFirst < Bid && minSL < (Bid - trailQuick) && OrderStopLoss() < trailQuick) {
+      bool modified = OrderModify(OrderTicket(), OrderOpenPrice(), NormalizeDouble(trailQuick, Digits), OrderTakeProfit(), 0);
     }
-    else if(quickProfit < Bid && minSL < (Bid - OrderOpenPrice()) && OrderStopLoss() < OrderOpenPrice()) {
+    else if(trailQuick < Bid && minSL < (Bid - OrderOpenPrice()) && OrderStopLoss() < OrderOpenPrice()) {
       bool modified = OrderModify(OrderTicket(), OrderOpenPrice(), NormalizeDouble(OrderOpenPrice(), Digits), OrderTakeProfit(), 0);
     }
   }
   else if(direction == OP_SELL) {
-    if(Ask < firstTarget && minSL < (quickProfit - Ask) && quickProfit < OrderStopLoss()) {
-      bool modified = OrderModify(OrderTicket(), OrderOpenPrice(), NormalizeDouble(quickProfit, Digits), OrderTakeProfit(), 0);
+    if(Ask < trailFirst && minSL < (trailQuick - Ask) && trailQuick < OrderStopLoss()) {
+      bool modified = OrderModify(OrderTicket(), OrderOpenPrice(), NormalizeDouble(trailQuick, Digits), OrderTakeProfit(), 0);
     }
-    else if(Ask < quickProfit && minSL < (OrderOpenPrice() - Ask) OrderOpenPrice() < OrderStopLoss()) {
+    else if(Ask < trailQuick && minSL < (OrderOpenPrice() - Ask) && OrderOpenPrice() < OrderStopLoss()) {
       bool modified = OrderModify(OrderTicket(), OrderOpenPrice(), NormalizeDouble(OrderOpenPrice(), Digits), OrderTakeProfit(), 0);
     }
   }
