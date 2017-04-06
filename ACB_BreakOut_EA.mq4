@@ -160,18 +160,18 @@ void OnDeinit(const int reason)
 void trailPosition(int direction) {
 
   if(direction == OP_BUY) {
-    if(firstTarget < Bid && minSL < (Bid - quickProfit)) {
+    if(firstTarget < Bid && minSL < (Bid - quickProfit) && OrderStopLoss() < quickProfit) {
       bool modified = OrderModify(OrderTicket(), OrderOpenPrice(), NormalizeDouble(quickProfit, Digits), OrderTakeProfit(), 0);
     }
-    else if(quickProfit < Bid && minSL < (Bid - OrderOpenPrice())) {
+    else if(quickProfit < Bid && minSL < (Bid - OrderOpenPrice()) && OrderStopLoss() < OrderOpenPrice()) {
       bool modified = OrderModify(OrderTicket(), OrderOpenPrice(), NormalizeDouble(OrderOpenPrice(), Digits), OrderTakeProfit(), 0);
     }
   }
   else if(direction == OP_SELL) {
-    if(Ask < firstTarget && minSL < (quickProfit - Ask)) {
+    if(Ask < firstTarget && minSL < (quickProfit - Ask) && quickProfit < OrderStopLoss()) {
       bool modified = OrderModify(OrderTicket(), OrderOpenPrice(), NormalizeDouble(quickProfit, Digits), OrderTakeProfit(), 0);
     }
-    else if(Ask < quickProfit && minSL < (OrderOpenPrice() - Ask)) {
+    else if(Ask < quickProfit && minSL < (OrderOpenPrice() - Ask) OrderOpenPrice() < OrderStopLoss()) {
       bool modified = OrderModify(OrderTicket(), OrderOpenPrice(), NormalizeDouble(OrderOpenPrice(), Digits), OrderTakeProfit(), 0);
     }
   }
