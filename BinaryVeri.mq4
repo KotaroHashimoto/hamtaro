@@ -23,11 +23,12 @@ string thisSymbol;
 double minLot;
 double maxLot;
 
+
 int signal() {
 
   if(iOpen(thisSymbol, PERIOD_CURRENT, 1) < iClose(thisSymbol, PERIOD_CURRENT, 1)) {
     if(iBands(thisSymbol, PERIOD_CURRENT, Band_Period, 2, 0, PRICE_WEIGHTED, 1, 1) < iClose(thisSymbol, PERIOD_CURRENT, 1)) {
-      if(iHighest(thisSymbol, PERIOD_CURRENT, MODE_HIGH, 20, 2) < iHigh(thisSymbol, PERIOD_CURRENT, 1)) {
+      if(High[iHighest(thisSymbol, PERIOD_CURRENT, MODE_HIGH, 20, 2)] < iHigh(thisSymbol, PERIOD_CURRENT, 1)) {
         if(70.0 < iRSI(thisSymbol, PERIOD_CURRENT, RSI_Period, PRICE_WEIGHTED, 1)) {
           return OP_SELL;
         }
@@ -36,7 +37,7 @@ int signal() {
   }
   else {
     if(iClose(thisSymbol, PERIOD_CURRENT, 1) < iBands(thisSymbol, PERIOD_CURRENT, Band_Period, 2, 0, PRICE_WEIGHTED, 2, 1)) {
-      if(iLow(thisSymbol, PERIOD_CURRENT, 1) < iLowest(thisSymbol, PERIOD_CURRENT, MODE_LOW, 20, 2)) {
+      if(iLow(thisSymbol, PERIOD_CURRENT, 1) < Low[iLowest(thisSymbol, PERIOD_CURRENT, MODE_LOW, 20, 2)]) {
         if(iRSI(thisSymbol, PERIOD_CURRENT, RSI_Period, PRICE_WEIGHTED, 1) < 30.0) {
           return OP_BUY;
         }
